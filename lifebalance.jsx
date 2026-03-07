@@ -151,6 +151,7 @@ export default function App(){
     haptic("save");
     const next={...entries,[date]:{...drafts}};
     setEntries(next); persist(pp,next); setSaved(true);
+    track("day_recorded");
   };
 
   const startDemo=()=>{
@@ -160,9 +161,12 @@ export default function App(){
 
   const startNew=()=>{ setNewPP(genPP()); setScreen("onboard"); };
 
+  const track = (name) => { try{ window.va&&window.va("event",{name}); }catch{} };
+
   const confirmNew=async()=>{
     await window.storage.set("hab_pp",newPP);
     setPP(newPP); setEntries({}); setIsDemo(false); setScreen("main");
+    track("journal_created");
   };
 
   const signIn=async()=>{
@@ -170,6 +174,7 @@ export default function App(){
     if(!p.match(/^[a-z]+-[a-z]+-[a-z]+$/)){ setPPErr("Format: word-word-word"); return; }
     await window.storage.set("hab_pp",p);
     setPP(p); setEntries(await loadData(p)); setIsDemo(false); setScreen("main");
+    track("journal_opened");
   };
 
   const signOut=async()=>{
@@ -226,9 +231,14 @@ export default function App(){
           <div style={{flex:1,height:1,background:"#EEE"}}/>
         </div>
 
-        <button onClick={startDemo} style={{background:"none",border:"1.5px solid #E8E8E8",borderRadius:10,padding:"12px",fontSize:13,color:"#555",cursor:"pointer",fontFamily:FF,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          <span style={{fontSize:16}}>👀</span> View demo journal
-        </button>
+        <div style={{display:"flex",gap:8}}>
+          <button onClick={startDemo} style={{flex:1,background:"none",border:"1.5px solid #E8E8E8",borderRadius:10,padding:"12px",fontSize:12,fontWeight:600,letterSpacing:0.5,color:"#555",cursor:"pointer",fontFamily:FF,display:"flex",alignItems:"center",justifyContent:"center"}}>
+            DEMO
+          </button>
+          <button onClick={()=>setScreen("about")} style={{flex:1,background:"none",border:"1.5px solid #E8E8E8",borderRadius:10,padding:"12px",fontSize:12,fontWeight:600,letterSpacing:0.5,color:"#555",cursor:"pointer",fontFamily:FF,display:"flex",alignItems:"center",justifyContent:"center"}}>
+            ABOUT
+          </button>
+        </div>
       </div>
 
       <div style={{marginTop:48,display:"flex",gap:24,flexWrap:"wrap",justifyContent:"center"}}>
@@ -241,7 +251,8 @@ export default function App(){
     </div>
   );
 
-  // ── ONBOARD ──
+  // ── ABOUT ──
+  if(screen==="about") return <AboutView onBack={()=>setScreen("splash")} onStart={startNew} />;
   if(screen==="onboard") return(
     <div style={{minHeight:"100vh",background:"#fff",fontFamily:FF,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
       <div style={{width:"100%",maxWidth:360}}>
@@ -299,7 +310,7 @@ export default function App(){
       {/* Nav */}
       <div style={{background:"#fff",borderBottom:"1px solid #EEE"}}>
         <div style={{...mw,display:"flex"}}>
-          {[["today","Today"],["week","Week"],["month","Month"],["year","Year"]].map(([v,l])=>(
+          {[["about","ABOUT"],["today","TODAY"],["week","WEEK"],["month","MONTH"],["year","YEAR"]].map(([v,l])=>(
             <button key={v} onClick={()=>{ haptic("nav"); setView(v); }} style={{
               flex:1,background:"none",border:"none",
               borderBottom:view===v?`2px solid ${GREEN}`:"2px solid transparent",
@@ -407,6 +418,199 @@ export default function App(){
             lineData={yearData()} xKey="month"
             radarData={radarData(Object.keys(entries).filter(d=>d.startsWith(curY)))}
           />
+        )}
+
+        {view==="about"&&(
+          <AboutView embedded />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── ABOUT VIEW ──────────────────────────────────────────────────────────────
+const FAQ_SECTIONS = [
+  {
+    title: "Privacy & Data Security",
+    items: [
+      { q: "Is my data safe?", a: "There's nothing to protect, honestly. The app never asks for your name, email, or anything about you. You get three random words as your key — that's it. Your entries live on your device. Nobody can see them." },
+      { q: "How do I know you're not tracking me?", a: "The app has no backend, no database, no server that stores anything about you. It's a static web app — like a document that runs in your browser. Your journal lives in your phone's local storage, tied to your passphrase. There's nowhere for data to go." },
+      { q: "What if someone finds my phone?", a: "Your entries are stored under your passphrase key. If they don't know your three words, they can't access anything. Lock your phone like you normally would." },
+      { q: "What happens if I lose my three words?", a: "The journal is gone — there's no recovery. That's a feature, not a bug. It means there's no back door, no \"forgot my password\" flow. You are the only key." },
+      { q: "Do you use any analytics?", a: "Vercel (the hosting platform) counts total page visits — just a number, like a hit counter. No personal data, no behavior tracking, no cookies." },
+    ]
+  },
+  {
+    title: "How It Works",
+    items: [
+      { q: "What are the five dimensions?", a: null, list: [
+        { label: "Spirit", desc: "Are you growing in your faith journey? Your inner life, sense of meaning, and connection to God.", color: "#F59E0B", icon: "✦" },
+        { label: "Body", desc: "Are you taking care of the vessel? Physical health, sleep, energy, and movement.", color: "#10B981", icon: "◈" },
+        { label: "Vocation", desc: "Are you showing up with purpose? Your work, contribution, and sense of calling.", color: "#3B82F6", icon: "⬡" },
+        { label: "Bond", desc: "Are you present in your closest relationship? Your partner, family, and deepest connection.", color: "#EC4899", icon: "◇" },
+        { label: "Shape", desc: "Are you becoming who you want to be? Character, growth, and the direction of your life.", color: "#8B5CF6", icon: "◬" },
+      ]},
+      { q: "What do the scores mean?", a: null, scores: true },
+      { q: "What is the 'balance shape'?", a: "Your scores over time form a pentagon on the radar chart. A regular pentagon — five equal sides — represents harmony across all dimensions. Most people's shapes are lopsided in interesting ways. That's the insight." },
+    ]
+  },
+  {
+    title: "Getting Started",
+    items: [
+      { q: "How do I start?", a: "Go to habitudes.app. Tap 'Create my journal.' You'll receive three random words — write them down somewhere safe. That's your key. Then score your day." },
+      { q: "Can I add it to my home screen?", a: "Yes. On iPhone, open habitudes.app in Safari, tap the Share button, then 'Add to Home Screen.' It'll behave like a native app — no browser bar, full screen." },
+      { q: "Is there a daily reminder?", a: "Yes. In the Today tab, there's a reminder toggle. Set your preferred time and allow notifications when prompted." },
+    ]
+  },
+  {
+    title: "Technical",
+    items: [
+      { q: "What's the architecture? (for tech folks)", a: "Pure client-side React app hosted on Vercel's CDN. No API calls, no database, no authentication. localStorage keyed to a passphrase hash. Vercel analytics sees traffic counts only — no personal data." },
+      { q: "Does it work offline?", a: "Mostly. Once loaded, the app works without a connection. New entries save locally. You'll need a connection to first load the app." },
+      { q: "Is there an iOS or Android app?", a: "Not yet. The web app installed to your home screen behaves like a native app. A proper App Store version may come later." },
+    ]
+  },
+];
+
+function AboutView({ embedded, onBack, onStart }) {
+  const [open, setOpen] = useState({});
+  const toggle = key => setOpen(o => ({...o, [key]: !o[key]}));
+
+  return (
+    <div style={{
+      paddingTop: embedded ? 28 : 0,
+      paddingBottom: embedded ? 40 : 0,
+      minHeight: embedded ? undefined : "100vh",
+      background: "#fff",
+      fontFamily: FF,
+    }}>
+      {/* Back button (splash mode only) */}
+      {!embedded && (
+        <div style={{padding:"16px 24px 0"}}>
+          <button onClick={onBack} style={{background:"none",border:"none",color:"#AAA",fontSize:13,cursor:"pointer",fontFamily:FF,display:"flex",alignItems:"center",gap:6}}>
+            ← Back
+          </button>
+        </div>
+      )}
+
+      {/* Logo (splash mode only) */}
+      {!embedded && (
+        <div style={{padding:"24px 24px 0",textAlign:"center"}}>
+          <img src={LOGO} alt="Habitudes" style={{height:40,width:"auto",marginBottom:20}} />
+        </div>
+      )}
+
+      <div style={{maxWidth:520,margin:"0 auto",padding:"0 20px"}}>
+
+        {/* Purpose statement */}
+        <div style={{marginBottom:36}}>
+          <div style={{fontSize:embedded?20:18,fontWeight:700,color:"#000",letterSpacing:-0.3,marginBottom:16}}>
+            Why I built this
+          </div>
+          {[
+            "Time moves fast. Years have a way of slipping by before we notice that something important quietly stopped getting our attention — a relationship, our health, our faith, our sense of purpose.",
+            "I built Habitudes because I wanted a simple, honest way to ask myself each evening: how did I actually show up today? Not a productivity tracker or a goal system — just five quiet questions about the five things that matter most to me.",
+            "Over time, the scores draw a shape. That shape reveals something a journal entry can't — the pattern. Where you're flourishing. Where you're drifting. The small, consistent choices that become who you are.",
+            "This is a tool for anyone who believes that growth is intentional, that becoming takes attention, and that the examined life — even in sixty seconds — is worth living.",
+          ].map((para, i) => (
+            <p key={i} style={{fontSize:14,color:"#444",lineHeight:1.75,margin:"0 0 14px",fontStyle: i===3 ? "italic" : "normal"}}>
+              {para}
+            </p>
+          ))}
+          <p style={{fontSize:13,color:"#AAA",margin:"16px 0 0"}}>— David Bishop</p>
+        </div>
+
+        {/* Divider */}
+        <div style={{height:1,background:"#EEE",marginBottom:32}} />
+
+        {/* FAQ accordion */}
+        {FAQ_SECTIONS.map((section, si) => (
+          <div key={si} style={{marginBottom:28}}>
+            <div style={{fontSize:11,fontWeight:700,color:GREEN,textTransform:"uppercase",letterSpacing:1.5,marginBottom:12}}>
+              {section.title}
+            </div>
+            {section.items.map((item, ii) => {
+              const key = `${si}-${ii}`;
+              const isOpen = open[key];
+              return (
+                <div key={ii} style={{borderBottom:"1px solid #F0F0F0"}}>
+                  <button
+                    onClick={() => toggle(key)}
+                    style={{
+                      width:"100%", background:"none", border:"none", padding:"13px 0",
+                      display:"flex", alignItems:"center", justifyContent:"space-between",
+                      cursor:"pointer", fontFamily:FF, textAlign:"left",
+                      WebkitTapHighlightColor:"transparent",
+                    }}
+                  >
+                    <span style={{fontSize:13,fontWeight:600,color:"#000",paddingRight:16,lineHeight:1.4}}>
+                      {item.q}
+                    </span>
+                    <span style={{
+                      fontSize:16,color:"#AAA",flexShrink:0,
+                      transform:isOpen?"rotate(90deg)":"rotate(0deg)",
+                      transition:"transform 0.2s",display:"block",lineHeight:1,
+                    }}>›</span>
+                  </button>
+                  {isOpen && (
+                    <div style={{paddingBottom:16}}>
+                      {item.a && (
+                        <p style={{fontSize:13,color:"#555",lineHeight:1.7,margin:0}}>{item.a}</p>
+                      )}
+                      {item.list && (
+                        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                          {item.list.map(cat => (
+                            <div key={cat.label} style={{display:"flex",alignItems:"flex-start",gap:12}}>
+                              <div style={{
+                                width:28,height:28,borderRadius:8,background:cat.color+"18",
+                                display:"flex",alignItems:"center",justifyContent:"center",
+                                fontSize:12,color:cat.color,flexShrink:0,marginTop:1,
+                              }}>{cat.icon}</div>
+                              <div>
+                                <div style={{fontSize:13,fontWeight:600,color:"#000",marginBottom:2}}>{cat.label}</div>
+                                <div style={{fontSize:12,color:"#666",lineHeight:1.5}}>{cat.desc}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {item.scores && (
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 16px"}}>
+                          {SCORES.map(s => (
+                            <div key={s} style={{display:"flex",alignItems:"center",gap:10}}>
+                              <div style={{
+                                width:30,height:30,borderRadius:8,background:GREEN,
+                                display:"flex",alignItems:"center",justifyContent:"center",
+                                fontSize:11,fontWeight:700,color:"#fff",flexShrink:0,
+                              }}>{S_SHORT[s]}</div>
+                              <span style={{color:"#555",fontSize:13}}>{S_LABEL[s]}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+
+        {/* Footer CTA — splash mode only */}
+        {!embedded && (
+          <div style={{marginTop:32,paddingTop:24,borderTop:"1px solid #EEE",textAlign:"center"}}>
+            <button
+              onClick={onStart}
+              style={{
+                background:GREEN,color:"#fff",border:"none",borderRadius:10,
+                padding:"14px 32px",fontSize:14,fontWeight:600,cursor:"pointer",
+                fontFamily:FF,WebkitTapHighlightColor:"transparent",
+              }}
+            >
+              Create my journal
+            </button>
+            <p style={{fontSize:12,color:"#AAA",marginTop:12}}>Free, private, no signup.</p>
+          </div>
         )}
       </div>
     </div>
