@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+  import { useState, useEffect, useRef, useCallback } from "react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
@@ -151,6 +151,7 @@ export default function App(){
     haptic("save");
     const next={...entries,[date]:{...drafts}};
     setEntries(next); persist(pp,next); setSaved(true);
+    track("day_recorded");
   };
 
   const startDemo=()=>{
@@ -160,9 +161,12 @@ export default function App(){
 
   const startNew=()=>{ setNewPP(genPP()); setScreen("onboard"); };
 
+  const track = (name) => { try{ window.va&&window.va("event",{name}); }catch{} };
+
   const confirmNew=async()=>{
     await window.storage.set("hab_pp",newPP);
     setPP(newPP); setEntries({}); setIsDemo(false); setScreen("main");
+    track("journal_created");
   };
 
   const signIn=async()=>{
@@ -170,6 +174,7 @@ export default function App(){
     if(!p.match(/^[a-z]+-[a-z]+-[a-z]+$/)){ setPPErr("Format: word-word-word"); return; }
     await window.storage.set("hab_pp",p);
     setPP(p); setEntries(await loadData(p)); setIsDemo(false); setScreen("main");
+    track("journal_opened");
   };
 
   const signOut=async()=>{
@@ -292,7 +297,7 @@ export default function App(){
       {/* Header */}
       <div style={{background:"#fff",borderBottom:"1px solid #EEE",position:"sticky",top:0,zIndex:10}}>
         <div style={{...mw,display:"flex",alignItems:"center",justifyContent:"space-between",height:54}}>
-          <img src={LOGO} alt="Habitudes" style={{height:26,width:"auto"}}/>
+          <img src={LOGO} alt="Habitudes" style={{height:30,width:"auto"}}/>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             {!isDemo&&<span style={{fontSize:11,color:"#CCC",fontFamily:"monospace"}}>{pp}</span>}
             <button onClick={signOut} style={{background:"none",border:"none",color:"#AAA",fontSize:12,cursor:"pointer",fontFamily:FF}}>
