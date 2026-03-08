@@ -1,4 +1,4 @@
-  import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
@@ -148,6 +148,7 @@ export default function App(){
 
   const saveEntry=()=>{
     if(!CATS.every(c=>drafts[c.id]!==undefined))return;
+    if(saved)return;
     haptic("save");
     const next={...entries,[date]:{...drafts}};
     setEntries(next); persist(pp,next); setSaved(true);
@@ -357,8 +358,8 @@ export default function App(){
 
             {!isDemo&&(
               <div style={{marginTop:20}}>
-                <Btn onClick={saveEntry} disabled={!allScored} full style={{padding:"15px",fontSize:14}}>
-                  {saved?"✓  Day recorded":"Record this day"}
+                <Btn onClick={saveEntry} disabled={!allScored||saved} full style={{padding:"15px",fontSize:14,background:saved?"#10B981":undefined,transition:"background 0.3s ease"}}>
+                  {saved?"✓  Day recorded — well done!":"Record this day"}
                 </Btn>
               </div>
             )}
