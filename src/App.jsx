@@ -56,13 +56,82 @@ const scoreColor = n => { const v=parseFloat(n); if(v>=1.5)return GREEN; if(v>=0
 const scoreLabel = v => { if(v>=1.5)return"Flourishing"; if(v>=0.5)return"Good"; if(v>=-0.5)return"Neutral"; if(v>=-1.5)return"Struggling"; return"Neglected"; };
 
 // ─── BUTTON ──────────────────────────────────────────────────────────────────
+const CLOSE_QUOTES = [
+  "The examined life is worth living.",
+  "One more day of showing up.",
+  "Small steps. Big shape.",
+  "You did the work. Rest well.",
+  "Consistency is quiet courage.",
+  "Growth isn't loud. But it's real.",
+  "Another day of becoming.",
+  "Faithful in the small things.",
+  "Well done. See you tomorrow.",
+  "Today counted. So will tomorrow.",
+  "You showed up. That's everything.",
+  "The shape emerges one day at a time.",
+  "Progress is its own reward.",
+  "Sixty seconds of honesty. That matters.",
+  "Keep going. The pattern is forming.",
+  "Rest now. You earned it.",
+  "The best version of you is built daily.",
+  "Balance is a practice, not a destination.",
+  "You can't pour from an empty vessel. You filled it today.",
+  "What gets measured gets tended.",
+  "Character is who you are when no one is watching.",
+  "Roots grow deep before branches reach high.",
+  "Today's small act is tomorrow's strong habit.",
+  "The life you want is built in days like this.",
+  "Intentional living starts with a single honest moment.",
+  "You paused. You reflected. That's rare.",
+  "Grace for yesterday. Intention for tomorrow.",
+  "Every day is a chance to realign.",
+  "Showing up is half the battle. You won today.",
+  "Not perfect. Present. That's enough.",
+  "Slow growth is still growth.",
+  "You honored today. Honor tomorrow.",
+  "The shape of your life is made of moments like this.",
+  "Faithful with the time you were given.",
+  "A life well-examined is a life well-lived.",
+  "You chose reflection over distraction. That matters.",
+  "Even rest is part of the rhythm.",
+  "Tomorrow is a fresh page. Rest well.",
+  "One degree of change each day moves mountains.",
+  "You showed up for yourself. Now rest.",
+  "The examined heart grows stronger.",
+  "Stillness before tomorrow. You've earned it.",
+  "Tend the garden daily and it will flourish.",
+  "Small faithfulness leads to great trust.",
+  "Be gentle with yourself. You're a work in progress.",
+  "Today you were a little more you.",
+  "The river carves the canyon one day at a time.",
+  "Well done, good and faithful steward of today.",
+  "Live fully. Love deeply. Show up daily.",
+  "The pattern is forming. Trust the process.",
+  "You are becoming. Keep going.",
+  "What you do today echoes into who you'll be.",
+  "Progress over perfection. Always.",
+  "The best investment you made today was in yourself.",
+  "One honest day at a time.",
+  "You chose growth. That's a victory.",
+  "Your future self is grateful for today.",
+  "Discipline is love made visible.",
+  "Let today's effort be enough. It is.",
+  "Each day you record is a brick in the foundation.",
+  "Intentionality is a gift you give your future self.",
+  "You're building something worth having.",
+  "Today you were faithful. That's everything.",
+  "The shape you're becoming is worth the effort.",
+  "Rest well. Tomorrow needs you whole.",
+];
+
 function Btn({children,onClick,variant="primary",disabled,full,style:sx}){
   const base={border:"none",borderRadius:10,padding:"13px 24px",fontSize:13,fontWeight:600,
     cursor:disabled?"not-allowed":"pointer",fontFamily:FF,transition:"opacity 0.15s",
     WebkitTapHighlightColor:"transparent",touchAction:"manipulation",
     display:"inline-flex",alignItems:"center",justifyContent:"center",gap:8,
     width:full?"100%":undefined,boxSizing:"border-box"};
-  if(disabled) return <button style={{...base,background:"#F0F0F0",color:"#AAAAAA",...sx}}>{children}</button>;
+  if(disabled&&!sx?.background) return <button style={{...base,background:"#F0F0F0",color:"#AAAAAA",...sx}}>{children}</button>;
+  if(disabled) return <button style={{...base,...sx}}>{children}</button>;
   if(variant==="primary") return <button onClick={onClick} style={{...base,background:GREEN,color:"#fff",...sx}}>{children}</button>;
   if(variant==="ghost")   return <button onClick={onClick} style={{...base,background:"transparent",color:"#333",border:"1.5px solid #E0E0E0",...sx}}>{children}</button>;
   return <button onClick={onClick} style={{...base,background:"#F5F5F5",color:"#333",border:"1.5px solid #E8E8E8",...sx}}>{children}</button>;
@@ -359,8 +428,15 @@ export default function App(){
             {!isDemo&&(
               <div style={{marginTop:20}}>
                 <Btn onClick={saveEntry} disabled={!allScored||saved} full style={{padding:"15px",fontSize:14,background:saved?"#10B981":undefined,transition:"background 0.3s ease"}}>
-                  {saved?"✓  Day recorded — well done!":"Record this day"}
+                  {saved?"✓  Day recorded":"Record this day"}
                 </Btn>
+                {saved&&(
+                  <div style={{marginTop:16,textAlign:"center",padding:"0 8px",animation:"fadeIn 0.6s ease"}}>
+                    <div style={{fontSize:15,color:"#444",fontStyle:"italic",lineHeight:1.5}}>
+                      "{CLOSE_QUOTES[new Date().getDate() % CLOSE_QUOTES.length]}"
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
