@@ -428,13 +428,13 @@ export default function App(){
             {!isDemo&&(
               <div style={{marginTop:20}}>
                 {!saved?(
-                  <Btn onClick={saveEntry} disabled={!allScored} full style={{padding:"15px",fontSize:14,background:"#111",color:"#fff"}}>
+                  <Btn onClick={saveEntry} disabled={!allScored} full style={{padding:"15px",fontSize:14,background:"#000",color:"#fff"}}>
                     Record this day
                   </Btn>
                 ):(
                   <div style={{textAlign:"center",padding:"20px 8px",animation:"fadeIn 0.8s ease"}}>
                     <div style={{fontSize:16,color:"#222",fontStyle:"italic",lineHeight:1.6}}>
-                      "{CLOSE_QUOTES[new Date().getDate() % CLOSE_QUOTES.length]}"
+                      {`"${CLOSE_QUOTES[new Date().getDate() % CLOSE_QUOTES.length]}"`}
                     </div>
                   </div>
                 )}
