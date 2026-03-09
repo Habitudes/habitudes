@@ -427,12 +427,13 @@ export default function App(){
 
             {!isDemo&&(
               <div style={{marginTop:20}}>
-                <Btn onClick={saveEntry} disabled={!allScored||saved} full style={{padding:"15px",fontSize:14,background:saved?"#10B981":undefined,transition:"background 0.3s ease"}}>
-                  {saved?"✓  Day recorded":"Record this day"}
-                </Btn>
-                {saved&&(
-                  <div style={{marginTop:16,textAlign:"center",padding:"0 8px",animation:"fadeIn 0.6s ease"}}>
-                    <div style={{fontSize:15,color:"#444",fontStyle:"italic",lineHeight:1.5}}>
+                {!saved?(
+                  <Btn onClick={saveEntry} disabled={!allScored} full style={{padding:"15px",fontSize:14,background:"#111",color:"#fff"}}>
+                    Record this day
+                  </Btn>
+                ):(
+                  <div style={{textAlign:"center",padding:"20px 8px",animation:"fadeIn 0.8s ease"}}>
+                    <div style={{fontSize:16,color:"#222",fontStyle:"italic",lineHeight:1.6}}>
                       "{CLOSE_QUOTES[new Date().getDate() % CLOSE_QUOTES.length]}"
                     </div>
                   </div>
@@ -508,16 +509,6 @@ export default function App(){
 // ─── ABOUT VIEW ──────────────────────────────────────────────────────────────
 const FAQ_SECTIONS = [
   {
-    title: "Privacy & Data Security",
-    items: [
-      { q: "Is my data safe?", a: "There's nothing to protect, honestly. The app never asks for your name, email, or anything about you. You get three random words as your key — that's it. Your entries live on your device. Nobody can see them." },
-      { q: "How do I know you're not tracking me?", a: "The app has no backend, no database, no server that stores anything about you. It's a static web app — like a document that runs in your browser. Your journal lives in your phone's local storage, tied to your passphrase. There's nowhere for data to go." },
-      { q: "What if someone finds my phone?", a: "Your entries are stored under your passphrase key. If they don't know your three words, they can't access anything. Lock your phone like you normally would." },
-      { q: "What happens if I lose my three words?", a: "The journal is gone — there's no recovery. That's a feature, not a bug. It means there's no back door, no \"forgot my password\" flow. You are the only key." },
-      { q: "Do you use any analytics?", a: "Vercel (the hosting platform) counts total page visits — just a number, like a hit counter. No personal data, no behavior tracking, no cookies." },
-    ]
-  },
-  {
     title: "How It Works",
     items: [
       { q: "What are the five dimensions?", a: null, list: [
@@ -537,6 +528,16 @@ const FAQ_SECTIONS = [
       { q: "How do I start?", a: "Go to habitudes.app. Tap 'Create my journal.' You'll receive three random words — write them down somewhere safe. That's your key. Then score your day." },
       { q: "Can I add it to my home screen?", a: "Yes. On iPhone, open habitudes.app in Safari, tap the Share button, then 'Add to Home Screen.' It'll behave like a native app — no browser bar, full screen." },
       { q: "Is there a daily reminder?", a: "Yes. In the Today tab, there's a reminder toggle. Set your preferred time and allow notifications when prompted." },
+    ]
+  },
+  {
+    title: "Privacy & Data Security",
+    items: [
+      { q: "Is my data safe?", a: "There's nothing to protect, honestly. The app never asks for your name, email, or anything about you. You get three random words as your key — that's it. Your entries live on your device. Nobody can see them." },
+      { q: "How do I know you're not tracking me?", a: "The app has no backend, no database, no server that stores anything about you. It's a static web app — like a document that runs in your browser. Your journal lives in your phone's local storage, tied to your passphrase. There's nowhere for data to go." },
+      { q: "What if someone finds my phone?", a: "Your entries are stored under your passphrase key. If they don't know your three words, they can't access anything. Lock your phone like you normally would." },
+      { q: "What happens if I lose my three words?", a: "The journal is gone — there's no recovery. That's a feature, not a bug. It means there's no back door, no \"forgot my password\" flow. You are the only key." },
+      { q: "Do you use any analytics?", a: "Vercel (the hosting platform) counts total page visits — just a number, like a hit counter. No personal data, no behavior tracking, no cookies." },
     ]
   },
   {
@@ -585,12 +586,13 @@ function AboutView({ embedded, onBack, onStart }) {
             Why I built this
           </div>
           {[
+            "Before clay becomes what it's meant to be, it gets shaped. Same goes for us.",
             "Time moves fast. Years have a way of slipping by before we notice that something important quietly stopped getting our attention — a relationship, our health, our faith, our sense of purpose.",
-            "I built Habitudes because I wanted a simple, honest way to ask myself each evening: how did I actually show up today? Not a productivity tracker or a goal system — just five quiet questions about the five things that matter most to me.",
+            "I wanted to build Habitudes as a simple, honest way to ask myself each evening: how did I actually show up today? Not a productivity tracker or a goal system — just five quiet questions about the five things that matter most to me.",
             "Over time, the scores draw a shape. That shape reveals something a journal entry can't — the pattern. Where you're flourishing. Where you're drifting. The small, consistent choices that become who you are.",
             "This is a tool for anyone who believes that growth is intentional, that becoming takes attention, and that the examined life — even in sixty seconds — is worth living.",
           ].map((para, i) => (
-            <p key={i} style={{fontSize:14,color:"#444",lineHeight:1.75,margin:"0 0 14px",fontStyle: i===3 ? "italic" : "normal"}}>
+            <p key={i} style={{fontSize:14,color:"#444",lineHeight:1.75,margin:"0 0 14px",fontStyle: i===4 ? "italic" : "normal"}}>
               {para}
             </p>
           ))}
