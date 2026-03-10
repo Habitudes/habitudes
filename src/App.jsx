@@ -32,7 +32,10 @@ const VERBS = ["holds","reads","tends","keeps","marks","turns","bears","draws","
 const genPP = () => { const p=a=>a[Math.floor(Math.random()*a.length)]; return `${p(ADJS)}-${p(NOUNS)}-${p(VERBS)}`; };
 
 // ─── DATE UTILS ───────────────────────────────────────────────────────────────
-const todayStr  = () => new Date().toISOString().split("T")[0];
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
 const getDIM    = (y,m) => new Date(y,m+1,0).getDate();
 const DAYS   = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const MONS   = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -167,7 +170,8 @@ export default function App(){
     })();
   },[]);
 
-  useEffect(()=>{ setDrafts(entries[date]?{...entries[date]}:{}); setSaved(false); setSavedQuote(null); },[date,entries]);
+  useEffect(()=>{ setDrafts(entries[date]?{...entries[date]}:{}); },[date,entries]);
+  useEffect(()=>{ setSaved(false); setSavedQuote(null); },[date]);
 
   // ── Reminder boot ──
   useEffect(()=>{
@@ -455,16 +459,19 @@ export default function App(){
                   })}
                 </div>
                 <div style={{marginTop:8}}>
-                  <Btn onClick={saveEntry} disabled={!allScored&&!saved} full
-                    style={{padding:"15px",fontSize:14,
-                      background:saved?"#1a6b3c":"#111",
-                      color:"#fff",
-                      transition:"background 0.3s, opacity 0.15s",
-                      opacity: (!allScored&&!saved) ? 0.4 : 1,
-                      cursor: (!allScored&&!saved) ? "not-allowed" : "pointer",
+                  <button
+                    onClick={allScored && !saved ? saveEntry : undefined}
+                    style={{
+                      width:"100%", padding:"15px", fontSize:14, fontWeight:600,
+                      background: saved ? "#1a6b3c" : allScored ? "#111" : "#888",
+                      color:"#fff", border:"none", borderRadius:10,
+                      cursor: allScored && !saved ? "pointer" : "default",
+                      transition:"background 0.3s",
+                      fontFamily:FF,
+                      WebkitTapHighlightColor:"transparent",
                     }}>
-                    {saved?"✔  Completed":"Record this day"}
-                  </Btn>
+                    {saved ? "✔  Completed" : "Record this day"}
+                  </button>
                 </div>
                 {saved && savedQuote && (
                   <div style={{marginTop:16,marginBottom:4,padding:"16px 20px",background:"#f0f8f4",borderRadius:12,textAlign:"center"}}>
