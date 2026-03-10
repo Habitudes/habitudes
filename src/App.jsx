@@ -48,8 +48,8 @@ function weekDates(date){
 const haptic = t => { try{ if(!navigator.vibrate)return; t==="save"?navigator.vibrate([12,50,18]):t==="nav"?navigator.vibrate(5):navigator.vibrate(8); }catch{} };
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
-const loadData = async pp => { try{ const r=await window.storage.get(`hab_${pp}`,true); return r?JSON.parse(r.value):{}; }catch{ return {}; } };
-const saveData = async (pp,data) => { try{ await window.storage.set(`hab_${pp}`,JSON.stringify(data),true); }catch{} };
+const loadData = async pp => { try{ const r=localStorage.getItem(`hab_${pp}`); return r?JSON.parse(r):{}; }catch{ return {}; } };
+const saveData = async (pp,data) => { try{ localStorage.setItem(`hab_${pp}`,JSON.stringify(data)); }catch{} };
 
 // ─── SCORE UTILS ─────────────────────────────────────────────────────────────
 const scoreColor = n => { const v=parseFloat(n); if(v>=1.5)return GREEN; if(v>=0.5)return "#2D6A4F"; if(v>-0.5)return "#888"; if(v>-1.5)return "#666"; return "#999"; };
@@ -160,8 +160,8 @@ export default function App(){
   useEffect(()=>{
     (async()=>{
       try{
-        const r=await window.storage.get("hab_pp");
-        if(r){ setPP(r.value); setEntries(await loadData(r.value)); setScreen("main"); }
+        const r=localStorage.getItem("hab_pp");
+        if(r){ setPP(r); setEntries(await loadData(r)); setScreen("main"); }
         else setScreen("splash");
       }catch{ setScreen("splash"); }
     })();
@@ -236,7 +236,7 @@ export default function App(){
   const track = (name) => { try{ window.va&&window.va("event",{name}); }catch{} };
 
   const confirmNew=async()=>{
-    await window.storage.set("hab_pp",newPP);
+    localStorage.setItem("hab_pp",newPP);
     setPP(newPP); setEntries({}); setIsDemo(false); setScreen("main");
     track("journal_created");
   };
@@ -244,13 +244,13 @@ export default function App(){
   const signIn=async()=>{
     const p=ppInput.trim().toLowerCase();
     if(!p.match(/^[a-z]+-[a-z]+-[a-z]+$/)){ setPPErr("Format: word-word-word"); return; }
-    await window.storage.set("hab_pp",p);
+    localStorage.setItem("hab_pp",p);
     setPP(p); setEntries(await loadData(p)); setIsDemo(false); setScreen("main");
     track("journal_opened");
   };
 
   const signOut=async()=>{
-    try{ await window.storage.delete("hab_pp"); }catch{}
+    try{ localStorage.removeItem("hab_pp"); }catch{}
     setScreen("splash"); setPP(""); setPPI(""); setPPErr(""); setIsDemo(false);
   };
 
