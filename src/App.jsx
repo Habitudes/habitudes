@@ -42,9 +42,15 @@ const MONS   = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov
 const MONFULL= ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 function weekDates(date){
-  const d=new Date(date), day=d.getDay();
-  const mon=new Date(d.setDate(d.getDate()-day+(day===0?-6:1)));
-  return Array.from({length:7},(_,i)=>{ const nd=new Date(mon); nd.setDate(mon.getDate()+i); return nd.toISOString().split("T")[0]; });
+  // Parse date parts directly to avoid UTC/local timezone shift
+  const [y,m,d] = date.split("-").map(Number);
+  const anchor = new Date(y, m-1, d);
+  const day = anchor.getDay(); // 0=Sun,1=Mon,...6=Sat
+  const mondayOffset = day===0 ? -6 : 1-day; // shift back to Monday
+  return Array.from({length:7}, (_,i)=>{
+    const nd = new Date(y, m-1, d + mondayOffset + i);
+    return `${nd.getFullYear()}-${String(nd.getMonth()+1).padStart(2,"0")}-${String(nd.getDate()).padStart(2,"0")}`;
+  });
 }
 
 // ─── HAPTICS ─────────────────────────────────────────────────────────────────
