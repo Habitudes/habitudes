@@ -55,17 +55,87 @@ const saveData = async (pp,data) => { try{ await window.storage.set(`hab_${pp}`,
 const scoreColor = n => { const v=parseFloat(n); if(v>=1.5)return GREEN; if(v>=0.5)return "#2D6A4F"; if(v>-0.5)return "#888"; if(v>-1.5)return "#666"; return "#999"; };
 const scoreLabel = v => { if(v>=1.5)return"Flourishing"; if(v>=0.5)return"Good"; if(v>=-0.5)return"Neutral"; if(v>=-1.5)return"Struggling"; return"Neglected"; };
 
+// ─── CLOSING QUOTES ──────────────────────────────────────────────────────────
+const CLOSE_QUOTES = [
+  // Scripture
+  { text: "I can do all things through Christ who strengthens me.", ref: "Philippians 4:13" },
+  { text: "Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.", ref: "Joshua 1:9" },
+  { text: "Commit to the Lord whatever you do, and he will establish your plans.", ref: "Proverbs 16:3" },
+  { text: "For we are God's handiwork, created in Christ Jesus to do good works, which God prepared in advance for us to do.", ref: "Ephesians 2:10" },
+  { text: "Do you not know that your bodies are temples of the Holy Spirit? Therefore honor God with your bodies.", ref: "1 Corinthians 6:19–20" },
+  { text: "Let us not become weary in doing good, for at the proper time we will reap a harvest if we do not give up.", ref: "Galatians 6:9" },
+  { text: "Trust in the Lord with all your heart and lean not on your own understanding.", ref: "Proverbs 3:5" },
+  { text: "And whatever you do, whether in word or deed, do it all in the name of the Lord Jesus.", ref: "Colossians 3:17" },
+  { text: "For I know the plans I have for you, declares the Lord — plans to prosper you and not to harm you.", ref: "Jeremiah 29:11" },
+  { text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles.", ref: "Isaiah 40:31" },
+  { text: "Be transformed by the renewing of your mind.", ref: "Romans 12:2" },
+  { text: "Love the Lord your God with all your heart and with all your soul and with all your mind and with all your strength.", ref: "Mark 12:30" },
+  { text: "The Lord is my shepherd; I shall not want.", ref: "Psalm 23:1" },
+  { text: "Create in me a pure heart, O God, and renew a steadfast spirit within me.", ref: "Psalm 51:10" },
+  { text: "Delight yourself in the Lord, and he will give you the desires of your heart.", ref: "Psalm 37:4" },
+  { text: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind.", ref: "Romans 12:2" },
+  { text: "Finally, brothers and sisters, whatever is true, whatever is noble — think about such things.", ref: "Philippians 4:8" },
+  { text: "Two are better than one, because they have a good return for their labor.", ref: "Ecclesiastes 4:9" },
+  { text: "Above all else, guard your heart, for everything you do flows from it.", ref: "Proverbs 4:23" },
+  { text: "He has shown you what is good: to act justly, love mercy, and walk humbly with your God.", ref: "Micah 6:8" },
+  // Aspirational
+  { text: "Small steps taken consistently will always outrun giant leaps taken occasionally.", ref: null },
+  { text: "You don't rise to the level of your goals. You fall to the level of your systems.", ref: "James Clear" },
+  { text: "The unexamined life is not worth living.", ref: "Socrates" },
+  { text: "We are what we repeatedly do. Excellence, then, is not an act but a habit.", ref: "Aristotle" },
+  { text: "Whoever you are, be a good one.", ref: "Abraham Lincoln" },
+  { text: "The quality of your life is determined by the quality of your questions.", ref: null },
+  { text: "What got you here won't get you there.", ref: "Marshall Goldsmith" },
+  { text: "You can't go back and change the beginning, but you can start where you are and change the ending.", ref: "C.S. Lewis" },
+  { text: "There is nothing noble in being superior to your fellow man; true nobility is being superior to your former self.", ref: "Ernest Hemingway" },
+  { text: "The journey of a thousand miles begins with a single step.", ref: "Lao Tzu" },
+  { text: "In the middle of every difficulty lies opportunity.", ref: "Albert Einstein" },
+  { text: "Your life is the sum of a remainder of an unbalanced equation inherent to the programming of the universe.", ref: null },
+  { text: "Knowing yourself is the beginning of all wisdom.", ref: "Aristotle" },
+  { text: "The only person you are destined to become is the person you decide to be.", ref: "Ralph Waldo Emerson" },
+  { text: "Do not watch the clock. Do what it does — keep going.", ref: "Sam Levenson" },
+  { text: "Act as if what you do makes a difference. It does.", ref: "William James" },
+  { text: "If you want to lift yourself up, lift up someone else.", ref: "Booker T. Washington" },
+  { text: "The secret of getting ahead is getting started.", ref: "Mark Twain" },
+  { text: "It always seems impossible until it's done.", ref: "Nelson Mandela" },
+  { text: "A man who dares to waste one hour of time has not discovered the value of life.", ref: "Charles Darwin" },
+  { text: "Life isn't about finding yourself. Life is about creating yourself.", ref: "George Bernard Shaw" },
+  { text: "You must be the change you wish to see in the world.", ref: "Gandhi" },
+  { text: "The man who moves a mountain begins by carrying away small stones.", ref: "Confucius" },
+  { text: "In character, in manner, in style — in all things the supreme excellence is simplicity.", ref: "Longfellow" },
+  { text: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", ref: "Emerson" },
+  { text: "The cave you fear to enter holds the treasure you seek.", ref: "Joseph Campbell" },
+  { text: "Do what you can, with what you have, where you are.", ref: "Theodore Roosevelt" },
+  { text: "The best time to plant a tree was twenty years ago. The second best time is now.", ref: "Chinese Proverb" },
+  { text: "Difficult roads often lead to beautiful destinations.", ref: null },
+  { text: "Strength does not come from what you can do. It comes from overcoming the things you thought you couldn't.", ref: null },
+  { text: "Be patient with yourself. Self-growth is tender; it's holy ground.", ref: "Stephen Covey" },
+  { text: "You will never always be motivated. You have to learn to be disciplined.", ref: null },
+  { text: "Don't count the days. Make the days count.", ref: "Muhammad Ali" },
+  { text: "Whoever is careless with the truth in small matters cannot be trusted with important matters.", ref: "Einstein" },
+  { text: "Character is the ability to carry out a good resolution long after the excitement of the moment has passed.", ref: "Cavett Robert" },
+  { text: "The will to win, the desire to succeed — the urge to reach your full potential — these are the keys.", ref: "Confucius" },
+  { text: "One day or day one. You decide.", ref: null },
+  { text: "Growth is never by mere chance; it is the result of forces working together.", ref: "James Cash Penney" },
+  { text: "Perseverance is not a long race; it is many short races one after the other.", ref: "Walter Elliot" },
+  { text: "The mind is not a vessel to be filled but a fire to be kindled.", ref: "Plutarch" },
+  { text: "Start where you are. Use what you have. Do what you can.", ref: "Arthur Ashe" },
+  { text: "Life is not measured by the number of breaths we take, but by the moments that take our breath away.", ref: null },
+  { text: "You are never too old to set another goal or to dream a new dream.", ref: "C.S. Lewis" },
+  { text: "The only way to do great work is to love what you do.", ref: "Steve Jobs" },
+  { text: "Seasons change, and so can we.", ref: null },
+];
+const getQuote = dateStr => CLOSE_QUOTES[new Date(dateStr).getDate() % CLOSE_QUOTES.length];
+
 // ─── BUTTON ──────────────────────────────────────────────────────────────────
 function Btn({children,onClick,variant="primary",disabled,full,style:sx}){
   const base={border:"none",borderRadius:10,padding:"13px 24px",fontSize:13,fontWeight:600,
-    cursor:disabled?"not-allowed":"pointer",fontFamily:FF,transition:"opacity 0.15s",
+    cursor:disabled?"not-allowed":"pointer",fontFamily:FF,transition:"background 0.3s, opacity 0.15s",
     WebkitTapHighlightColor:"transparent",touchAction:"manipulation",
     display:"inline-flex",alignItems:"center",justifyContent:"center",gap:8,
     width:full?"100%":undefined,boxSizing:"border-box"};
-  if(disabled) return <button style={{...base,background:"#F0F0F0",color:"#AAAAAA",...sx}}>{children}</button>;
-  if(variant==="primary") return <button onClick={onClick} style={{...base,background:GREEN,color:"#fff",...sx}}>{children}</button>;
-  if(variant==="ghost")   return <button onClick={onClick} style={{...base,background:"transparent",color:"#333",border:"1.5px solid #E0E0E0",...sx}}>{children}</button>;
-  return <button onClick={onClick} style={{...base,background:"#F5F5F5",color:"#333",border:"1.5px solid #E8E8E8",...sx}}>{children}</button>;
+  if(variant==="ghost") return <button onClick={!disabled?onClick:undefined} style={{...base,background:"transparent",color:"#333",border:"1.5px solid #E0E0E0",...sx}}>{children}</button>;
+  return <button onClick={!disabled?onClick:undefined} style={{...base,background:GREEN,color:"#fff",...sx}}>{children}</button>;
 }
 
 // ─── APP ─────────────────────────────────────────────────────────────────────
@@ -357,26 +427,43 @@ export default function App(){
 
             {!isDemo&&(
               <>
-                {/* Week strip */}
+                {/* Week strip — shows Mon–Sun of the currently selected date's week */}
                 <div style={{display:"flex",justifyContent:"center",gap:6,marginTop:24,marginBottom:8}}>
-                  {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>{
-                    const checked=Object.keys(entries).some(k=>DAYS[new Date(k).getDay()]===d&&entries[k]);
+                  {weekDates(date).map((d,i)=>{
+                    const checked=!!entries[d];
+                    const isToday=d===todayStr();
                     return <div key={d} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                      <div style={{width:30,height:30,borderRadius:"50%",border:"2px solid "+(checked?"#1a6b3c":"#ccc"),background:checked?"#e8f5ee":"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,color:checked?"#1a6b3c":"#bbb",fontWeight:700}}>
+                      <div style={{
+                        width:30,height:30,borderRadius:"50%",
+                        border:`2px solid ${checked?"#1a6b3c":isToday?"#999":"#ccc"}`,
+                        background:checked?"#e8f5ee":"#fff",
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        fontSize:14,color:checked?"#1a6b3c":"#bbb",fontWeight:700,
+                      }}>
                         {checked?"✓":""}
                       </div>
-                      <span style={{fontSize:10,color:"#888"}}>{d}</span>
+                      <span style={{fontSize:10,color:isToday?"#555":"#AAA",fontWeight:isToday?600:400}}>{DAYS[i]}</span>
                     </div>;
                   })}
                 </div>
                 <div style={{marginTop:8}}>
-                  <Btn onClick={saveEntry} disabled={!allScored} full style={{padding:"15px",fontSize:14,background:saved?"#1a6b3c":undefined,transition:"background 0.3s"}}>
-                    {saved?`✔  Recorded ${DAYS[new Date(date).getDay()]}`:"Record this day"}
+                  <Btn onClick={saveEntry} disabled={!allScored&&!saved} full
+                    style={{padding:"15px",fontSize:14,
+                      background:saved?"#1a6b3c":"#111",
+                      color:"#fff",
+                      transition:"background 0.3s, opacity 0.15s",
+                      opacity: (!allScored&&!saved) ? 0.4 : 1,
+                      cursor: (!allScored&&!saved) ? "not-allowed" : "pointer",
+                    }}>
+                    {saved?"✔  Completed":"Record this day"}
                   </Btn>
                 </div>
-                {saved&&<div style={{marginTop:16,marginBottom:4,padding:"12px 16px",background:"#f0f8f4",borderRadius:12,textAlign:"center",fontSize:13,color:"#2d6a4f",fontStyle:"italic"}}>
-                  “Small steps every day lead to extraordinary change.”
-                </div>}
+                {saved&&(()=>{ const q=getQuote(date); return(
+                  <div style={{marginTop:16,marginBottom:4,padding:"16px 20px",background:"#f0f8f4",borderRadius:12,textAlign:"center"}}>
+                    <div style={{fontSize:13,color:"#2d6a4f",fontStyle:"italic",lineHeight:1.7}}>"{q.text}"</div>
+                    {q.ref&&<div style={{fontSize:11,color:"#5a9a78",marginTop:8,fontWeight:500}}>— {q.ref}</div>}
+                  </div>
+                );})()}
               </>
             )}
 
