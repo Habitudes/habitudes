@@ -150,6 +150,7 @@ export default function App(){
   const [date,    setDate]    = useState(todayStr());
   const [drafts,  setDrafts]  = useState({});
   const [saved,   setSaved]   = useState(false);
+  const [savedQuote, setSavedQuote] = useState(null);
   const [isDemo,     setIsDemo]     = useState(false);
   const [reminderOn, setReminderOn]  = useState(false);
   const [reminderTime, setReminderTime] = useState("21:00");
@@ -166,7 +167,7 @@ export default function App(){
     })();
   },[]);
 
-  useEffect(()=>{ setDrafts(entries[date]?{...entries[date]}:{}); setSaved(false); },[date,entries]);
+  useEffect(()=>{ setDrafts(entries[date]?{...entries[date]}:{}); setSaved(false); setSavedQuote(null); },[date,entries]);
 
   // ── Reminder boot ──
   useEffect(()=>{
@@ -221,6 +222,7 @@ export default function App(){
     haptic("save");
     const next={...entries,[date]:{...drafts}};
     setEntries(next); persist(pp,next); setSaved(true);
+    setSavedQuote(getQuote(date));
     track("day_recorded");
   };
 
@@ -429,20 +431,26 @@ export default function App(){
               <>
                 {/* Week strip — shows Mon–Sun of the currently selected date's week */}
                 <div style={{display:"flex",justifyContent:"center",gap:6,marginTop:24,marginBottom:8}}>
-                  {weekDates(date).map((d,i)=>{
+                  {weekDates(todayStr()).map((d,i)=>{
                     const checked=!!entries[d];
                     const isToday=d===todayStr();
                     return <div key={d} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
                       <div style={{
                         width:30,height:30,borderRadius:"50%",
-                        border:`2px solid ${checked?"#1a6b3c":isToday?"#999":"#ccc"}`,
-                        background:checked?"#e8f5ee":"#fff",
+                        border:`2px solid ${checked?"#1a6b3c":isToday?GREEN:"#DDD"}`,
+                        background:checked?"#e8f5ee":isToday?"#f0f7f4":"#fff",
                         display:"flex",alignItems:"center",justifyContent:"center",
-                        fontSize:14,color:checked?"#1a6b3c":"#bbb",fontWeight:700,
+                        fontSize:14,
+                        color:checked?"#1a6b3c":isToday?GREEN:"#CCC",
+                        fontWeight:700,
                       }}>
-                        {checked?"✓":""}
+                        {checked?"✓":isToday?"·":""}
                       </div>
-                      <span style={{fontSize:10,color:isToday?"#555":"#AAA",fontWeight:isToday?600:400}}>{DAYS[i]}</span>
+                      <span style={{
+                        fontSize:10,
+                        color:isToday?GREEN:"#BBB",
+                        fontWeight:isToday?700:400,
+                      }}>{DAYS[i]}</span>
                     </div>;
                   })}
                 </div>
@@ -458,12 +466,12 @@ export default function App(){
                     {saved?"✔  Completed":"Record this day"}
                   </Btn>
                 </div>
-                {saved&&(()=>{ const q=getQuote(date); return(
+                {saved && savedQuote && (
                   <div style={{marginTop:16,marginBottom:4,padding:"16px 20px",background:"#f0f8f4",borderRadius:12,textAlign:"center"}}>
-                    <div style={{fontSize:13,color:"#2d6a4f",fontStyle:"italic",lineHeight:1.7}}>"{q.text}"</div>
-                    {q.ref&&<div style={{fontSize:11,color:"#5a9a78",marginTop:8,fontWeight:500}}>— {q.ref}</div>}
+                    <div style={{fontSize:13,color:"#2d6a4f",fontStyle:"italic",lineHeight:1.7}}>"{savedQuote.text}"</div>
+                    {savedQuote.ref && <div style={{fontSize:11,color:"#5a9a78",marginTop:8,fontWeight:500}}>— {savedQuote.ref}</div>}
                   </div>
-                );})()}
+                )}
               </>
             )}
 
